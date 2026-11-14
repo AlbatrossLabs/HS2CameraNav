@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using KKAPI;
+using KKAPI.Studio;
 using UnityEngine;
 
 namespace HS2CameraNav
@@ -25,7 +26,7 @@ namespace HS2CameraNav
     {
         public const string Guid = "com.albatrosslabs.hs2.cameranav";
         public const string PluginName = "Camera Nav";
-        public const string Version = "0.1.1";
+        public const string Version = "0.1.2";
 
         internal static new ManualLogSource Logger;
         internal static CameraNavPlugin Instance;
@@ -51,6 +52,10 @@ namespace HS2CameraNav
         internal ConfigEntry<bool> EmulateThreeButton;
         internal ConfigEntry<bool> NumpadViews;
         internal ConfigEntry<float> NumpadStep;
+
+        internal ConfigEntry<bool> BlockWhileFlying;
+        internal ConfigEntry<bool> ShowConflictMessage;
+        internal ConfigEntry<string> ConflictList;
 
         private void Awake()
         {
@@ -93,12 +98,29 @@ namespace HS2CameraNav
             NumpadStep = Config.Bind("5. Blender", "Numpad orbit step", 15f,
                 new ConfigDescription("Degrees per Numpad 2/4/6/8 press.", new AcceptableValueRange<float>(1f, 90f)));
 
+            BlockWhileFlying = Config.Bind("6. Hotkey conflicts", "Block while flying", true,
+                "While flying in Unity mode (right mouse held), other plugins' hotkeys on W/A/S/D/Q/E, plain or with Shift, don't fire. They work normally the rest of the time. Covers plugins that use BepInEx hotkey settings (most do).");
+            ShowConflictMessage = Config.Bind("6. Hotkey conflicts", "Show conflict message", true,
+                "Show an on-screen message when other plugins' hotkeys clash with Camera Nav's controls.");
+            ConflictList = Config.Bind("6. Hotkey conflicts", "Conflicts found", "",
+                new ConfigDescription("Other plugins' hotkeys that clash with Camera Nav, tagged with the scheme they affect. Rebinding one in F1 updates this list.",
+                    null, new ConfigurationManagerAttributes { CustomDrawer = HotkeyConflicts.Draw, HideDefaultButton = true, HideSettingName = true, Order = -10 }));
+
             Harmony.CreateAndPatchAll(typeof(Patches), Guid);
+
+            // Scan once Studio has finished loading, when every plugin has bound its settings.
+            StudioAPI.StudioLoadedChanged += (s, e) => HotkeyConflicts.MarkDirty();
+        }
+
+        private void Start()
+        {
+            if (StudioAPI.StudioLoaded) HotkeyConflicts.MarkDirty();
         }
 
         private void Update()
         {
             Navigator.Calibrate();
+            HotkeyConflicts.Tick();
 
             if (CycleSchemeKey.Value.IsDown())
             {

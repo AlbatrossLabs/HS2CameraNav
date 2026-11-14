@@ -1,3 +1,4 @@
+using BepInEx.Configuration;
 using HarmonyLib;
 using Studio;
 using CameraData = Studio.CameraControl.CameraData;
@@ -61,6 +62,29 @@ namespace HS2CameraNav
         private static bool ShortcutPrefix()
         {
             return !(Active && Navigator.Flying);
+        }
+
+        /// <summary>
+        /// Other plugins' BepInEx hotkeys on fly keys (W/A/S/D/Q/E, plain or with Shift) read as "not pressed"
+        /// while flying, so flying doesn't toggle them. Plugins that read keys directly aren't affected.
+        /// </summary>
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(KeyboardShortcut), nameof(KeyboardShortcut.IsDown))]
+        private static bool ShortcutIsDownPrefix(ref KeyboardShortcut __instance, ref bool __result) => AllowShortcut(ref __instance, ref __result);
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(KeyboardShortcut), nameof(KeyboardShortcut.IsPressed))]
+        private static bool ShortcutIsPressedPrefix(ref KeyboardShortcut __instance, ref bool __result) => AllowShortcut(ref __instance, ref __result);
+
+        private static bool AllowShortcut(ref KeyboardShortcut shortcut, ref bool result)
+        {
+            // Cheap checks first: this runs for every plugin's hotkey every frame.
+            if (!Navigator.Flying || !UnityEngine.Input.GetMouseButton(1)) return true;
+            var p = CameraNavPlugin.Instance;
+            if (p == null || p.Scheme.Value != NavScheme.Unity || !p.BlockWhileFlying.Value) return true;
+            if (!HotkeyConflicts.IsFlyKeyShortcut(shortcut)) return true;
+            result = false;
+            return false;
         }
     }
 }
