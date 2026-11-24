@@ -12,7 +12,7 @@
 
     <!--
       Optional: point this at your HS2 install and the built DLL is copied into
-      BepInEx\plugins\HS2CameraNav\ after every build.
+      BepInEx\plugins\AlbatrossLabs\HS2CameraNav\ after every build.
         dotnet build -c Release -p:HS2Dir="D:\Games\HoneySelect2"
       Or set it once here.
     -->
@@ -33,9 +33,16 @@
   </ItemGroup>
 
   <Target Name="DeployToHS2" AfterTargets="Build" Condition="'$(HS2Dir)' != ''">
-    <MakeDir Directories="$(HS2Dir)\BepInEx\plugins\HS2CameraNav" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(HS2Dir)\BepInEx\plugins\HS2CameraNav" />
-    <Message Importance="high" Text="Deployed $(AssemblyName).dll to $(HS2Dir)\BepInEx\plugins\HS2CameraNav" />
+    <MakeDir Directories="$(HS2Dir)\BepInEx\plugins\AlbatrossLabs\HS2CameraNav" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(HS2Dir)\BepInEx\plugins\AlbatrossLabs\HS2CameraNav" />
+    <Message Importance="high" Text="Deployed $(AssemblyName).dll to $(HS2Dir)\BepInEx\plugins\AlbatrossLabs\HS2CameraNav" />
   </Target>
 
+
+  <!-- Every Release build also keeps a copy of itself in bin\Releasev<version>\ (git-ignored): a local history of builds. -->
+  <Target Name="CopyToReleaseFolder" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <MakeDir Directories="$(MSBuildThisFileDirectory)bin\Releasev$(Version)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)bin\Releasev$(Version)" />
+    <Message Importance="high" Text="Copied $(TargetFileName) to bin\Releasev$(Version)" />
+  </Target>
 </Project>

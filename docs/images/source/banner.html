@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* Same look as HS2CameraRoutes/docs/images/source/banner.html (and Studio Browser). */
+  :root {
+    --bg: #0a0d18; --panel: #111827; --border: rgba(255,255,255,.10);
+    --text: #e8ecf8; --muted: #8b95b5; --cyan: #22d3ee; --pink: #f472b6; --neon: #6ee7b7; --blue: #2b3bff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; font-family: 'Inter', 'Inter Display', sans-serif; }
+  .stage { position: relative; overflow: hidden; background: var(--bg); }
+
+  .grid { position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 40px 40px; mask-image: linear-gradient(90deg, rgba(0,0,0,.9), rgba(0,0,0,.25)); }
+  .glow { position: absolute; border-radius: 50%; filter: blur(60px); }
+  .glow.c { background: rgba(34,211,238,.20); }
+  .glow.p { background: rgba(244,114,182,.38); }
+
+  .brand { position: absolute; display: flex; flex-direction: column; z-index: 5; }
+  .wordmark { display: flex; align-items: center; gap: 18px; }
+  .camera { font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: -1px; line-height: 1;
+    background: linear-gradient(90deg, var(--cyan), #a78bfa 55%, var(--pink)); -webkit-background-clip: text; color: transparent; }
+  .plate { display: flex; align-items: center; border: 2px solid var(--neon); border-radius: 14px;
+    background: rgba(110,231,183,.08); box-shadow: 0 0 22px rgba(110,231,183,.35), inset 0 0 18px rgba(110,231,183,.12); }
+  .word2 { font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--neon); letter-spacing: 1px; line-height: 1;
+    text-shadow: 0 0 14px rgba(110,231,183,.55); }
+  .underline { height: 4px; border-radius: 2px; margin-top: 16px; background: linear-gradient(90deg, var(--cyan), var(--pink)); }
+  .tagline { color: var(--text); margin-top: 16px; line-height: 1.35; }
+  .tagline b { color: #fff; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip { font-size: 15px; font-weight: 600; color: var(--text); padding: 6px 13px; border-radius: 999px;
+    border: 1px solid var(--border); background: rgba(255,255,255,.04); }
+  .chip.on { color: #0a0d18; background: var(--neon); border-color: var(--neon); }
+  .chip.pk { color: #ffd6ea; border-color: rgba(244,114,182,.6); background: rgba(244,114,182,.12); }
+  .by { font-size: 13px; letter-spacing: 2.5px; color: var(--muted); font-weight: 600; z-index: 5; }
+  .by b { color: var(--text); }
+
+  /* the bunny, with the orbit ring drawn half behind her and half in front */
+  .scene { position: absolute; }
+  .scene svg { position: absolute; left: 0; top: 0; overflow: visible; }
+  .girl { position: absolute; filter: drop-shadow(0 0 28px rgba(244,114,182,.45)); }
+  .girl img { display: block; width: 100%; -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent 100%); mask-image: linear-gradient(to bottom, #000 82%, transparent 100%); }
+
+  /* a Camera Nav "card" in the same window theme as Camera Routes */
+  .win { position: absolute; z-index: 4; border-radius: 12px; border: 1.5px solid rgba(110,231,183,.75); background: #0F1115;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 18px 60px rgba(0,0,0,.65), 0 0 40px rgba(110,231,183,.18);
+    transform-origin: left center; padding: 12px 14px 14px; color: #E6E8EE; }
+  .win::after { content: ''; position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(115deg, rgba(255,255,255,.08), transparent 35%); pointer-events: none; }
+  .win .t { color: #58A6FF; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .win .sec { border: 1px solid #262A33; background: #171A21; border-radius: 6px; padding: 5px 8px; font-size: 11.5px; color: #58A6FF; font-weight: 700; margin: 8px 0 6px; }
+  .win .sec span { color: #8B91A1; font-weight: 500; margin-left: 8px; }
+  .win .row { display: flex; gap: 4px; margin-top: 4px; }
+  .win .b { flex: 1; text-align: center; font-size: 11px; padding: 5px 0; border-radius: 5px; border: 1px solid #262A33; background: #171A21; color: #E6E8EE; }
+  .win .b.on { border-color: #6EE7B7; background: #1F3A36; color: #6EE7B7; }
+  .win .b.go { border-color: #6EE7B7; background: #6EE7B7; color: #0F1115; font-weight: 700; }
+  .win .keys { display: flex; gap: 10px; align-items: flex-start; margin-top: 2px; }
+  .win .kb { display: grid; grid-template-columns: repeat(3, 26px); gap: 4px; }
+  .win .k { height: 24px; border-radius: 5px; border: 1px solid #262A33; background: #171A21; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; color: #E6E8EE; }
+  .win .k.on { border-color: #6EE7B7; background: #6EE7B7; color: #0F1115; box-shadow: 0 0 8px rgba(110,231,183,.6); }
+  .win .k.shift { grid-column: span 3; font-weight: 600; }
+  .win .k.shift.on { background: #1F3A36; color: #6EE7B7; box-shadow: none; }
+  .win .mouse { width: 30px; height: 52px; border-radius: 15px; border: 1px solid #262A33; background: #171A21; position: relative; overflow: hidden; }
+  .win .mouse::before { content: ''; position: absolute; left: 15px; top: 0; width: 15px; height: 22px; background: #6EE7B7; }
+  .win .mouse::after { content: ''; position: absolute; left: 14px; top: 0; width: 1px; height: 22px; background: #262A33; }
+  .win .keyhint { font-size: 11px; color: #E6E8EE; line-height: 1.5; padding-top: 2px; }
+  .win .keyhint span { color: #8B91A1; }
+  .win .scrub { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 8px; color: #E6E8EE; }
+  .win .track { flex: 1; height: 4px; border-radius: 2px; background: #3A3F4A; position: relative; }
+  .win .track i { position: absolute; top: -4px; width: 12px; height: 12px; border-radius: 50%; background: #6EE7B7; box-shadow: 0 0 8px rgba(110,231,183,.7); }
+  .win .hint { font-size: 10.5px; color: #8B91A1; margin-top: 6px; }
+
+  /* Discord, 1200 x 800 (3:2) */
+  .discord { width: 1200px; height: 800px; }
+  .discord .glow.c { width: 600px; height: 420px; left: -160px; top: -120px; }
+  .discord .glow.p { width: 700px; height: 700px; right: -120px; top: 60px; }
+  .discord .brand { left: 60px; top: 64px; width: 620px; }
+  .discord .camera { font-size: 92px; }
+  .discord .plate { height: 88px; padding: 0 22px; }
+  .discord .word2 { font-size: 64px; }
+  .discord .underline { width: 400px; }
+  .discord .tagline { font-size: 24px; max-width: 580px; }
+  .discord .chips { max-width: 580px; }
+  .discord .by { position: absolute; left: 60px; bottom: 38px; }
+  .discord .scene { left: 640px; top: 0; width: 560px; height: 800px; }
+  .discord .girl { width: 556px; left: 4px; top: 128px; }
+  .discord .win { width: 330px; left: 60px; top: 470px; transform: perspective(1400px) rotateY(10deg) rotateZ(-1.5deg); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const layout = new URLSearchParams(location.search).get('layout') || 'discord';
+const chips = `
+  <div class="chips">
+    <div class="chip on">Unity + Blender schemes</div><div class="chip">WASD fly-through</div><div class="chip">Numpad snap views</div>
+    <div class="chip">Pan stays under cursor</div><div class="chip pk">Hotkey conflict checker</div>
+  </div>`;
+const brand = (tag) => `
+  <div class="brand">
+    <div class="wordmark"><div class="camera">CAMERA</div><div class="plate"><div class="word2">NAV</div></div></div>
+    <div class="underline"></div>
+    <div class="tagline">${tag}</div>
+    ${chips}
+  </div>`;
+const by = `<div class="by">HONEY SELECT 2 STUDIO PLUGINS · <b>ALBATROSS LABS</b></div>`;
+const win = `
+  <div class="win">
+    <div class="t">Camera Nav</div>
+    <div class="row"><div class="b">Vanilla</div><div class="b on">Unity</div><div class="b">Blender</div><div class="b go">Shift+F8</div></div>
+    <div class="sec">Fly <span>Hold right mouse</span></div>
+    <div class="keys">
+      <div class="kb"><div class="k">Q</div><div class="k on">W</div><div class="k">E</div>
+        <div class="k">A</div><div class="k">S</div><div class="k">D</div><div class="k shift on">Shift · boost</div></div>
+      <div class="mouse"></div>
+      <div class="keyhint">W A S D <span>move</span><br>Q / E <span>down / up</span><br>Scroll <span>fly speed</span></div>
+    </div>
+    <div class="scrub">Fly speed <div class="track"><i style="left:38%"></i></div> 1.5 u/s</div>
+    <div class="sec">Hotkey conflicts <span>1 Unity · blocked while flying</span></div>
+    <div class="hint">Other plugins' WASD hotkeys stay quiet mid-flight.</div>
+  </div>`;
+
+// ---- the orbit ring: a flat ellipse around her, back half behind, front half in front, camera on the front ----
+function orbit(w, h, cx, cy, rx, ry, head, camT, arrowTs) {
+  const N = 240, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, th = 2 * Math.PI * t;
+    pts.push({ t, th, x: cx + rx * Math.cos(th), y: cy + ry * Math.sin(th), front: Math.sin(th) > 0 });
+  }
+  const runs = []; let cur = null;
+  for (const p of pts) {
+    if (!cur || cur.front !== p.front) { if (cur) cur.pts.push(p); cur = { front: p.front, pts: [] }; runs.push(cur); }
+    cur.pts.push(p);
+  }
+  const path = r => 'M' + r.pts.map(p => p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' L');
+  const back = runs.filter(r => !r.front).map(r => `<path d="${path(r)}" fill="none" stroke="#3aa6d8" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 11"/>`).join('');
+  const frontGlow = runs.filter(r => r.front).map(r => `<path d="${path(r)}" fill="none" stroke="#6ee7b7" stroke-opacity=".35" stroke-width="12" stroke-linecap="round" filter="url(#blur)"/>`).join('');
+  const front = runs.filter(r => r.front).map(r => `<path d="${path(r)}" fill="none" stroke="#6ee7b7" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 11"/>`).join('');
+
+  // direction chevrons along the ring (orbit direction = increasing t)
+  const chevron = t => {
+    const p = pts[Math.round(t * N)], q = pts[Math.min(N, Math.round(t * N) + 2)];
+    const a = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+    const col = p.front ? '#6ee7b7' : '#3aa6d8', op = p.front ? 1 : .6;
+    return [p.front, `<g transform="translate(${p.x} ${p.y}) rotate(${a})" opacity="${op}"><path d="M-9 -10 L7 0 L-9 10" fill="none" stroke="${col}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g>`];
+  };
+  const chev = arrowTs.map(chevron);
+
+  // the camera, riding the ring, with its sight line to her face
+  const cp = pts[Math.round(camT * N)];
+  const ang = Math.atan2(head.y - cp.y, head.x - cp.x) * 180 / Math.PI;
+  const cam = `<line x1="${cp.x}" y1="${cp.y}" x2="${head.x}" y2="${head.y}" stroke="#6ee7b7" stroke-opacity=".7" stroke-width="2" stroke-dasharray="6 6"/>
+    <g transform="translate(${cp.x} ${cp.y}) scale(1.35) rotate(${ang})${Math.abs(ang) > 90 ? ' scale(1 -1)' : ''}" filter="url(#glow)">
+      <rect x="-22" y="-13" width="30" height="26" rx="5" fill="#e8ecf8"/>
+      <path d="M8 -8 L22 -14 L22 14 L8 8 Z" fill="#e8ecf8"/>
+      <circle cx="-14" cy="-19" r="6" fill="none" stroke="#e8ecf8" stroke-width="3"/>
+      <circle cx="-1" cy="-19" r="6" fill="none" stroke="#e8ecf8" stroke-width="3"/>
+      <circle cx="-7" cy="0" r="4.5" fill="#6ee7b7"/>
+    </g>`;
+
+  const defs = `<defs><filter id="blur"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#6ee7b7" flood-opacity=".8"/></filter></defs>`;
+  return {
+    back: `<svg width="${w}" height="${h}">${defs}${back}${chev.filter(c => !c[0]).map(c => c[1]).join('')}</svg>`,
+    front: `<svg width="${w}" height="${h}">${defs}${frontGlow}${front}${chev.filter(c => c[0]).map(c => c[1]).join('')}${cam}</svg>`,
+  };
+}
+
+// Ring at knee height around her, camera on the front-left looking up at her face.
+const ob = orbit(560, 800, 300, 560, 255, 58, { x: 177, y: 252 }, 0.445, [0.14, 0.62, 0.86]);
+
+document.getElementById('root').innerHTML = `
+  <div class="stage ${layout}">
+    <div class="grid"></div><div class="glow c"></div><div class="glow p"></div>
+    ${brand('Unity and Blender camera controls for <b>Honey Select 2 Studio</b>: orbit, pan and zoom on the mouse, plus WASD fly and numpad views.')}
+    ${win}
+    <div class="scene">
+      ${ob.back}
+      <div class="girl"><img src="bunny-nav.png"></div>
+      ${ob.front}
+    </div>
+    ${by}
+  </div>`;
+</script>
+</body>
+</html>
