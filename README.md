@@ -135,6 +135,7 @@ Conflict blocking prefixes BepInEx's `KeyboardShortcut.IsDown` and `IsPressed`, 
 
 ## Changelog
 
+- **1.0.0:** first stable release. Same features as 0.1.2: Unity and Blender schemes, fly mode, numpad views and the hotkey conflict checker.
 - **0.1.2:** hotkey conflict checker. Clashes with other plugins are listed in F1 by scheme, and hotkeys on fly keys are blocked while flying.
 - **0.1.1:** fixed drags twitching back toward where they started.
 - **0.1.0:** first release. Unity and Blender schemes, fly mode, numpad views.

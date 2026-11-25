@@ -26,7 +26,7 @@ namespace HS2CameraNav
     {
         public const string Guid = "com.albatrosslabs.hs2.cameranav";
         public const string PluginName = "Camera Nav";
-        public const string Version = "0.1.2";
+        public const string Version = "1.0.0";
 
         internal static new ManualLogSource Logger;
         internal static CameraNavPlugin Instance;
