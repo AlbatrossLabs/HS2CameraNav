@@ -88,18 +88,71 @@
   .discord .scene { left: 640px; top: 0; width: 560px; height: 800px; }
   .discord .girl { width: 556px; left: 4px; top: 128px; }
   .discord .win { width: 330px; left: 60px; top: 470px; transform: perspective(1400px) rotateY(10deg) rotateZ(-1.5deg); }
+
+  /* README banner (also the itch page header: itch wants at least 960 x 340), 1600 x 400 */
+  .banner { width: 1600px; height: 400px; }
+  .banner .glow.c { width: 520px; height: 300px; left: -120px; top: -80px; }
+  .banner .glow.p { width: 520px; height: 480px; right: -40px; top: -20px; }
+  .banner .brand { left: 64px; top: 48px; width: 680px; }
+  .banner .camera { font-size: 80px; }
+  .banner .plate { height: 76px; padding: 0 20px; }
+  .banner .word2 { font-size: 54px; }
+  .banner .underline { width: 360px; }
+  .banner .tagline { font-size: 21px; }
+  .banner .by { position: absolute; left: 64px; bottom: 26px; }
+  .banner .scene { left: 1150px; top: 0; width: 450px; height: 400px; }
+  .banner .girl { width: 400px; left: 30px; top: -10px; }
+  .banner .win { width: 330px; left: 790px; top: 66px; transform: perspective(1400px) rotateY(-12deg) rotateZ(1.5deg); }
+
+  /* itch.io cover, 630 x 500 (itch's recommended size; rendered at 2x) */
+  .itch { width: 630px; height: 500px; }
+  .itch .glow.c { width: 360px; height: 260px; left: -110px; top: -90px; }
+  .itch .glow.p { width: 420px; height: 460px; right: -90px; top: 60px; }
+  .itch .brand { left: 30px; top: 30px; width: 420px; }
+  .itch .wordmark { gap: 12px; }
+  .itch .camera { font-size: 62px; }
+  .itch .plate { height: 58px; padding: 0 14px; border-radius: 11px; }
+  .itch .word2 { font-size: 42px; }
+  .itch .underline { width: 220px; margin-top: 12px; height: 3px; }
+  .itch .tagline { font-size: 17px; max-width: 240px; margin-top: 12px; }
+  .itch .chips { max-width: 240px; gap: 6px; margin-top: 14px; }
+  .itch .chip { font-size: 13px; padding: 5px 11px; }
+  .itch .by { position: absolute; left: 30px; bottom: 20px; font-size: 10px; letter-spacing: 2px; }
+  .itch .scene { left: 280px; top: 0; width: 350px; height: 500px; }
+  .itch .girl { width: 350px; left: 0; top: 133px; filter: drop-shadow(0 0 18px rgba(244,114,182,.45)); }
+
+  /* YouTube thumbnail, 1280 x 720. Shoulders-up crop: YouTube age-restricts thumbnails that focus on the body. */
+  .youtube { width: 1280px; height: 720px; }
+  .youtube .glow.c { width: 640px; height: 460px; left: -180px; top: -140px; }
+  .youtube .glow.p { width: 760px; height: 760px; right: -160px; top: -20px; }
+  .youtube .brand { left: 64px; top: 64px; width: 520px; }
+  .youtube .wordmark { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .youtube .camera { font-size: 128px; letter-spacing: -2px; }
+  .youtube .plate { height: 112px; padding: 0 28px; border-radius: 18px; }
+  .youtube .word2 { font-size: 86px; }
+  .youtube .underline { width: 420px; margin-top: 22px; height: 5px; }
+  .youtube .tagline { font-size: 42px; font-weight: 700; line-height: 1.18; margin-top: 22px; color: #fff; }
+  .youtube .tagline em { font-style: normal; color: var(--neon); text-shadow: 0 0 14px rgba(110,231,183,.5); }
+  .youtube .by { position: absolute; left: 64px; bottom: 40px; font-size: 16px; letter-spacing: 3px; }
+  .youtube .scene { left: 560px; top: 0; width: 720px; height: 720px; }
+  .youtube .girl { width: 700px; left: 22px; top: 20px; filter: drop-shadow(0 0 36px rgba(244,114,182,.5)); }
+  .youtube .girl img { -webkit-mask-image: none; mask-image: none; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
 const layout = new URLSearchParams(location.search).get('layout') || 'discord';
-const chips = `
+const chipsFull = `
   <div class="chips">
     <div class="chip on">Unity + Blender schemes</div><div class="chip">WASD fly-through</div><div class="chip">Numpad snap views</div>
     <div class="chip">Pan stays under cursor</div><div class="chip pk">Hotkey conflict checker</div>
   </div>`;
-const brand = (tag) => `
+const chipsSmall = `
+  <div class="chips">
+    <div class="chip on">Unity + Blender</div><div class="chip">WASD fly</div><div class="chip">Numpad views</div>
+  </div>`;
+const brand = (tag, chips) => `
   <div class="brand">
     <div class="wordmark"><div class="camera">CAMERA</div><div class="plate"><div class="word2">NAV</div></div></div>
     <div class="underline"></div>
@@ -124,7 +177,7 @@ const win = `
   </div>`;
 
 // ---- the orbit ring: a flat ellipse around her, back half behind, front half in front, camera on the front ----
-function orbit(w, h, cx, cy, rx, ry, head, camT, arrowTs) {
+function orbit(w, h, cx, cy, rx, ry, head, camT, arrowTs, camScale = 1.35) {
   const N = 240, pts = [];
   for (let i = 0; i <= N; i++) {
     const t = i / N, th = 2 * Math.PI * t;
@@ -153,7 +206,7 @@ function orbit(w, h, cx, cy, rx, ry, head, camT, arrowTs) {
   const cp = pts[Math.round(camT * N)];
   const ang = Math.atan2(head.y - cp.y, head.x - cp.x) * 180 / Math.PI;
   const cam = `<line x1="${cp.x}" y1="${cp.y}" x2="${head.x}" y2="${head.y}" stroke="#6ee7b7" stroke-opacity=".7" stroke-width="2" stroke-dasharray="6 6"/>
-    <g transform="translate(${cp.x} ${cp.y}) scale(1.35) rotate(${ang})${Math.abs(ang) > 90 ? ' scale(1 -1)' : ''}" filter="url(#glow)">
+    <g transform="translate(${cp.x} ${cp.y}) scale(${camScale}) rotate(${ang})${Math.abs(ang) > 90 ? ' scale(1 -1)' : ''}" filter="url(#glow)">
       <rect x="-22" y="-13" width="30" height="26" rx="5" fill="#e8ecf8"/>
       <path d="M8 -8 L22 -14 L22 14 L8 8 Z" fill="#e8ecf8"/>
       <circle cx="-14" cy="-19" r="6" fill="none" stroke="#e8ecf8" stroke-width="3"/>
@@ -169,17 +222,34 @@ function orbit(w, h, cx, cy, rx, ry, head, camT, arrowTs) {
   };
 }
 
-// Ring at knee height around her, camera on the front-left looking up at her face.
-const ob = orbit(560, 800, 300, 560, 255, 58, { x: 177, y: 252 }, 0.445, [0.14, 0.62, 0.86]);
+// Per-layout content. ob = orbit(width, height, ring cx, ring cy, rx, ry, face point, camera position on the ring, chevrons, camera size)
+const full = 'Unity and Blender camera controls for <b>Honey Select 2 Studio</b>: orbit, pan and zoom on the mouse, plus WASD fly and numpad views.';
+const L = {
+  // Ring at knee height around her, camera on the front-left looking up at her face.
+  discord: { img: 'bunny-nav.png', win: true, chips: chipsFull, tag: full,
+    ob: [560, 800, 300, 560, 255, 58, { x: 177, y: 252 }, 0.445, [0.14, 0.62, 0.86]] },
+  banner: { img: 'bunny-nav.png', win: true, chips: chipsFull,
+    tag: 'Unity and Blender camera controls for <b>Honey Select 2 Studio</b>:<br>orbit, pan and zoom, WASD fly and numpad views.',
+    ob: [450, 400, 250, 292, 190, 34, { x: 155, y: 79 }, 0.445, [0.14, 0.62, 0.86], 1.0] },
+  itch: { img: 'bunny-nav.png', win: false, chips: chipsSmall,
+    tag: 'Unity and Blender camera controls for <b>HS2 Studio</b>.',
+    ob: [350, 500, 192, 382, 160, 30, { x: 109, y: 211 }, 0.445, [0.14, 0.62], 0.9] },
+  // Ring around her shoulders, camera on the front-left looking at her face.
+  youtube: { img: 'bunny-nav-head.png', win: false, chips: '',
+    tag: 'Unity + Blender<br>controls for <em>HS2 Studio</em>',
+    ob: [720, 720, 450, 476, 250, 52, { x: 438, y: 315 }, 0.445, [0.14, 0.62, 0.86], 1.6] },
+};
+const c = L[layout];
+const ob = orbit(...c.ob);
 
 document.getElementById('root').innerHTML = `
   <div class="stage ${layout}">
     <div class="grid"></div><div class="glow c"></div><div class="glow p"></div>
-    ${brand('Unity and Blender camera controls for <b>Honey Select 2 Studio</b>: orbit, pan and zoom on the mouse, plus WASD fly and numpad views.')}
-    ${win}
+    ${brand(c.tag, c.chips)}
+    ${c.win ? win : ''}
     <div class="scene">
       ${ob.back}
-      <div class="girl"><img src="bunny-nav.png"></div>
+      <div class="girl"><img src="${c.img}"></div>
       ${ob.front}
     </div>
     ${by}

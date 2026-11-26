@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.png" alt="Camera Nav: Unity and Blender camera controls for Honey Select 2 Studio" width="100%">
+  <img src="docs/images/banner.png" alt="Camera Nav: Unity and Blender camera controls for Honey Select 2 Studio" width="100%">
 </p>
 
 <p align="center">
